@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>markmax · 设置</title>
+    <link rel="stylesheet" href="../shared.css" />
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 48px 24px;
+      }
+      .wrap {
+        width: 100%;
+        max-width: 480px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+        color: #fff;
+        font-family: ui-monospace, monospace;
+        font-weight: 600;
+        font-size: 16px;
+        border-radius: 6px;
+      }
+      .brand-title {
+        font-family: ui-monospace, monospace;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .section {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .field {
+        margin-bottom: 14px;
+      }
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .hint {
+        margin-top: 12px;
+        font-size: 12px;
+        line-height: 1.8;
+        color: var(--text-secondary);
+      }
+      .hint code {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        background: var(--bg-subtle);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1px 6px;
+        color: var(--text);
+      }
+      .ok-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #000;
+        margin-right: 6px;
+      }
+      .status-note {
+        font-size: 13px;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+      }
+      .error-text {
+        font-size: 12px;
+        color: var(--danger);
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="brand">
+        <div class="brand-mark">m</div>
+        <span class="brand-title">markmax</span>
+        <span class="micro-label" style="margin-top: 4px">设置</span>
+      </div>
+
+      <div class="section">
+        <p class="micro-label" style="margin-bottom: 14px">服务端连接</p>
+        <div class="field">
+          <label class="field-label">服务端地址</label>
+          <input id="cfg-server" class="input" placeholder="http://localhost:8080" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label class="field-label">API token</label>
+          <input id="cfg-token" class="input" type="password" placeholder="粘贴 token（服务端日志或 data/token）" spellcheck="false" />
+        </div>
+        <p id="status" class="status-note"></p>
+        <p id="error" class="error-text"></p>
+        <div class="btn-row">
+          <button id="btn-save" class="btn btn-primary">保存并测试连接</button>
+          <button id="btn-clear" class="btn btn-ghost">清除配置</button>
+        </div>
+      </div>
+
+      <div class="section" id="info">
+        <p class="micro-label" style="margin-bottom: 10px">书签概况</p>
+        <p class="hint" style="margin-top: 0">连接后显示。</p>
+      </div>
+
+      <p class="hint" style="font-size: 11px; color: var(--text-muted)">
+        提示：服务端地址与 token 可分别在服务端日志（首次启动打印 <code>API token: …</code>）和
+        <code>server/data/token</code> 文件中查看。
+      </p>
+    </div>
+
+    <script src="../lib/api.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

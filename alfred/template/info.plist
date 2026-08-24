@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>user.workflow.markmax-sync</string>
+	<key>connections</key>
+	<dict>
+		<key>98B7CD33-369F-467B-A031-30042E274BB7</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>D8802720-6C70-4A0F-8AB0-12D332AD95FC</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>36FF4E08-F440-4179-BB67-A4F25DAB616D</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>D8802720-6C70-4A0F-8AB0-12D332AD95FC</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>markmax</string>
+	<key>description</key>
+	<string>markmax 书签搜索与快速新增（读写本机缓存，自动同步）</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>markmax 书签</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>mk</string>
+				<key>queuedelaycustom</key>
+				<integer>200</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>1</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>搜索中…</string>
+				<key>script</key>
+				<string>./mk.sh "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>输入关键词搜索；空查询列出文件夹，⇥ 进入浏览</string>
+				<key>title</key>
+				<string>markmax 书签搜索</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>98B7CD33-369F-467B-A031-30042E274BB7</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>mka</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>1</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>获取标签页…</string>
+				<key>script</key>
+				<string>./mka.sh "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>获取当前浏览器活动标签页，选择文件夹保存</string>
+				<key>title</key>
+				<string>markmax 添加书签</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>36FF4E08-F440-4179-BB67-A4F25DAB616D</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>./action.sh "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>D8802720-6C70-4A0F-8AB0-12D332AD95FC</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string># markmax 书签（Alfred workflow）
+
+mk   搜索书签：空查询列出文件夹（⇥ 进入浏览），输入关键词全局搜索；↩ 打开链接，⌘↩ 复制链接。
+mka  新增书签：在 Chrome / Edge / Brave / Safari 前台触发，取当前活动标签页，选择文件夹保存（直接回车存为未分类）。
+
+依赖 markmax-sync CLI（cargo install --path cli）。
+首次使用各浏览器时 macOS 会请求自动化授权，请允许。</string>
+	<key>uidata</key>
+	<dict>
+		<key>98B7CD33-369F-467B-A031-30042E274BB7</key>
+		<dict>
+			<key>xpos</key>
+			<real>200</real>
+			<key>ypos</key>
+			<real>120</real>
+		</dict>
+		<key>36FF4E08-F440-4179-BB67-A4F25DAB616D</key>
+		<dict>
+			<key>xpos</key>
+			<real>200</real>
+			<key>ypos</key>
+			<real>320</real>
+		</dict>
+		<key>D8802720-6C70-4A0F-8AB0-12D332AD95FC</key>
+		<dict>
+			<key>xpos</key>
+			<real>520</real>
+			<key>ypos</key>
+			<real>220</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array/>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>1.0.0</string>
+	<key>webaddress</key>
+	<string></string>
+</dict>
+</plist>

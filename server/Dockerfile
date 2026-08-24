@@ -1,0 +1,26 @@
+# ---- stage 1: build the admin UI ----
+FROM node:24-alpine AS web
+WORKDIR /app/web
+COPY web/ ./
+RUN npm install --no-audit --no-fund && npm run build
+
+# ---- stage 2: build the server ----
+FROM rust:1.85-bookworm AS build
+WORKDIR /build
+COPY Cargo.toml ./
+COPY src/ ./src/
+RUN cargo build --release
+
+# ---- stage 3: runtime ----
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=web /app/web/dist /app/web/dist
+COPY --from=build /build/target/release/markmax-server /usr/local/bin/markmax-server
+ENV MARKMAX_DATA_DIR=/data
+ENV MARKMAX_WEB_DIR=/app/web/dist
+VOLUME ["/data"]
+EXPOSE 8080
+ENTRYPOINT ["markmax-server"]
+CMD ["--port", "8080"]

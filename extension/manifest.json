@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "markmax",
+  "version": "0.2.0",
+  "description": "markmax 书签管理：快速增删查改，数据同步到 markmax 服务端",
+  "permissions": ["storage"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "action": {
+    "default_title": "markmax",
+    "default_popup": "popup/popup.html"
+  },
+  "options_page": "options/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
