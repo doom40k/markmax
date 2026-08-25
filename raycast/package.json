@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markmax",
+  "title": "markmax",
+  "description": "搜索浏览与快速收藏 markmax 书签（直接读写本机缓存 ~/.markmax）",
+  "icon": "assets/icon.png",
+  "author": "doom40k",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "搜索书签",
+      "description": "浏览文件夹与全局搜索本机书签缓存（对应 Alfred mk）",
+      "mode": "view"
+    },
+    {
+      "name": "add-bookmark",
+      "title": "收藏当前页面",
+      "description": "把浏览器当前活动标签页存入 markmax 缓存（对应 Alfred mka）",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cacheDir",
+      "title": "缓存目录",
+      "description": "markmax 本机缓存目录（默认 ~/.markmax，须与 CLI daemon 一致）",
+      "type": "textfield",
+      "required": false,
+      "default": "~/.markmax"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

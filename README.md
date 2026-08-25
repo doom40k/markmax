@@ -30,6 +30,7 @@
 | `extension/` | Chrome 插件 (MV3) | 直连服务端 REST API，跨浏览器通用（**必装**） |
 | `cli/` | 本机同步工具 | 维护本地缓存供桌面效率工具秒级读取；文件变更即时同步 + 定时同步（**可选**，仅使用 Alfred 等效率工具时需要） |
 | `alfred/` | Alfred workflow | `mk` 搜索浏览、`mka` 快速新增（**可选**） |
+| `raycast/` | Raycast 插件 | 与 Alfred 插件功能对等，直接读写本机缓存（**可选**） |
 
 ## 界面预览
 
@@ -90,7 +91,7 @@ brew services start markmax    # LaunchAgent 常驻，崩溃自动拉起
 # 3. 安装 Alfred workflow：双击 alfred/dist/markmax.alfredworkflow
 ```
 
-> 本地缓存 `~/.markmax/bookmarks.json` 是开放格式（见「cli — 缓存目录格式」），你也可以自己写 Raycast / Raycast Script / Keyboard Maestro / 命令行脚本等工具直接读取它，不依赖 Alfred 与 markmax-sync。
+> 本地缓存 `~/.markmax/bookmarks.json` 是开放格式（见「cli — 缓存目录格式」），你可以自己写 Keyboard Maestro / 命令行脚本等工具直接读取它，不依赖 Alfred 与 markmax-sync。**仓库已内置 Raycast 插件**（`raycast/`，与 Alfred 功能对等），安装见 `raycast/README.md`。
 
 ---
 
@@ -380,5 +381,6 @@ bookmark/
 ├── server/          # 服务端（Rust axum + sqlite + web/ 管理界面 + Dockerfile）
 ├── extension/       # Chrome 插件（MV3）
 ├── cli/             # 本机同步工具（Rust CLI）
-└── alfred/          # Alfred workflow（template/ 模板，build.sh 打包出 dist/*.alfredworkflow）
+├── alfred/          # Alfred workflow（template/ 模板，build.sh 打包出 dist/*.alfredworkflow）
+├── raycast/         # Raycast 插件（与 Alfred 功能对等，直接读写本机缓存）
 ```
