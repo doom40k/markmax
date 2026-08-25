@@ -122,7 +122,25 @@ docker run -d -p 8080:8080 -v markmax-data:/data markmax-server
 
 Rust CLI，作为后台服务运行：**缓存目录下的 bookmarks.json 一变（插件改动），立即同步到服务端；同时每 3 分钟定时拉取服务端变更**，双向同步按 `updated_at` 最后写入者胜。
 
-### 用法
+### 安装（Homebrew）
+
+```bash
+brew tap doom40k/tools https://github.com/doom40k/homebrew-tools
+brew install doom40k/tools/markmax
+```
+
+首次使用先在终端完成配置（交互式）：`markmax-sync --config`。无交互终端（如后台服务）下运行会直接报错退出，不会卡在配置流程。
+
+### 后台常驻（brew services）
+
+```bash
+brew services start markmax   # 常驻后台（用户态 LaunchAgent，keep_alive 崩溃自动拉起）
+brew services stop markmax    # 停止
+```
+
+日志输出到 `/tmp/markmax.log`。升级方式：主仓库打新 tag / release → 更新 tap 中 formula 的 url 与 sha256 → `brew upgrade markmax`。
+
+### 从源码运行
 
 ```bash
 cd cli && cargo run --release
@@ -139,7 +157,7 @@ cd cli && cargo run --release
 | `--interval <秒>` | 定时同步间隔，默认 180（3 分钟） |
 | `install-host` | 注册 Chrome / Chromium 的 Native Messaging 宿主清单（插件通信用） |
 
-后台运行建议配合 launchd / systemd / `nohup` 使用。
+后台常驻推荐用 Homebrew 安装后 `brew services start markmax`（见下），无需手动配置 launchd。
 
 ### 缓存目录格式（与 Chrome 插件共享）
 
