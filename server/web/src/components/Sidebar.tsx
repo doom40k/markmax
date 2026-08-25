@@ -209,14 +209,14 @@ export function Sidebar({
                   expand(n.name)
                   setInline({ mode: 'new', parent: n.name })
                 }}
-                className="px-1.5 hover:text-black"
+                className={`px-1.5 ${active ? 'hover:text-white/70' : 'hover:text-black'}`}
               >
                 ＋
               </button>
               <button
                 title="重命名"
                 onClick={() => setInline({ mode: 'rename', path: n.name })}
-                className="px-1.5 hover:text-black"
+                className={`px-1.5 ${active ? 'hover:text-white/70' : 'hover:text-black'}`}
               >
                 ✎
               </button>
@@ -227,7 +227,7 @@ export function Sidebar({
                     void onDeleteFolder(n.name).then(() => setInline(null))
                   }
                 }}
-                className="px-1.5 hover:text-red-600"
+                className={active ? 'px-1.5 hover:text-red-400' : 'px-1.5 hover:text-red-600'}
               >
                 ✕
               </button>
@@ -279,7 +279,10 @@ export function Sidebar({
           />
           <NavItem
             active={view === 'all' && folder === '' && !tag}
-            onClick={() => onFolderChange(folder === '' ? null : '')}
+            onClick={() => {
+              onViewChange('all')
+              onFolderChange(folder === '' ? null : '')
+            }}
             label="未分类"
             count={untaggedCount}
           />

@@ -6,6 +6,19 @@
 	<string>user.workflow.markmax-sync</string>
 	<key>connections</key>
 	<dict>
+		<key>36FF4E08-F440-4179-BB67-A4F25DAB616D</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>D8802720-6C70-4A0F-8AB0-12D332AD95FC</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>98B7CD33-369F-467B-A031-30042E274BB7</key>
 		<array>
 			<dict>
@@ -19,11 +32,11 @@
 				<false/>
 			</dict>
 		</array>
-		<key>36FF4E08-F440-4179-BB67-A4F25DAB616D</key>
+		<key>D8802720-6C70-4A0F-8AB0-12D332AD95FC</key>
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>D8802720-6C70-4A0F-8AB0-12D332AD95FC</string>
+				<string>7A1E4C55-90D2-4B6E-A8F3-52C6E1D9B0A4</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -61,7 +74,7 @@
 				<key>keyword</key>
 				<string>mk</string>
 				<key>queuedelaycustom</key>
-				<integer>200</integer>
+				<integer>3</integer>
 				<key>queuedelayimmediatelyinitially</key>
 				<true/>
 				<key>queuedelaymode</key>
@@ -164,6 +177,27 @@
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<true/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>markmax 已添加</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>7A1E4C55-90D2-4B6E-A8F3-52C6E1D9B0A4</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string># markmax 书签（Alfred workflow）
@@ -175,26 +209,33 @@ mka  新增书签：在 Chrome / Edge / Brave / Safari 前台触发，取当前�
 首次使用各浏览器时 macOS 会请求自动化授权，请允许。</string>
 	<key>uidata</key>
 	<dict>
-		<key>98B7CD33-369F-467B-A031-30042E274BB7</key>
-		<dict>
-			<key>xpos</key>
-			<real>200</real>
-			<key>ypos</key>
-			<real>120</real>
-		</dict>
 		<key>36FF4E08-F440-4179-BB67-A4F25DAB616D</key>
 		<dict>
 			<key>xpos</key>
-			<real>200</real>
+			<real>200.0</real>
 			<key>ypos</key>
-			<real>320</real>
+			<real>320.0</real>
+		</dict>
+		<key>7A1E4C55-90D2-4B6E-A8F3-52C6E1D9B0A4</key>
+		<dict>
+			<key>xpos</key>
+			<real>520.0</real>
+			<key>ypos</key>
+			<real>320.0</real>
+		</dict>
+		<key>98B7CD33-369F-467B-A031-30042E274BB7</key>
+		<dict>
+			<key>xpos</key>
+			<real>200.0</real>
+			<key>ypos</key>
+			<real>120.0</real>
 		</dict>
 		<key>D8802720-6C70-4A0F-8AB0-12D332AD95FC</key>
 		<dict>
 			<key>xpos</key>
-			<real>520</real>
+			<real>520.0</real>
 			<key>ypos</key>
-			<real>220</real>
+			<real>220.0</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>

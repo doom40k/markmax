@@ -21,3 +21,8 @@ html {
   scrollbar-width: thin;
   scrollbar-color: #d4d4d4 transparent;
 }
+
+/* Tailwind v4 preflight 移除了 button 的默认 pointer，全局恢复 */
+button:not(:disabled) {
+  cursor: pointer;
+}
