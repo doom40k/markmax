@@ -374,6 +374,31 @@ MV3 插件，Vercel 黑白风格，**直连服务端 REST API**（跨浏览器�
 
 ---
 
+## raycast — Raycast 插件
+
+与 Alfred 插件功能对等，**直接读写本机缓存**（不经 CLI 二进制），两者可并存。前置与 Alfred 相同：CLI daemon 常驻（`brew services start markmax`）保持缓存新鲜并同步到服务端。
+
+### 安装
+
+```bash
+cd raycast
+npm install
+npm run build    # 产出编译后的扩展到 dist/ 目录
+```
+
+Raycast 偏好设置（⌘,）→ Extensions → + → **Import Extension** → 选择 **`raycast/dist` 目录**（编译产物目录，不是项目根目录），永久安装。代码更新后重新 build 并重新导入。
+
+### 使用
+
+| 命令 | 功能 |
+| --- | --- |
+| 搜索书签（search） | 空查询列出顶层文件夹 + 未分类（含条目数）；↩ 进入文件夹逐级浏览，框内输入继续过滤；有关键词时全局搜索 title/url/notes/tags/folder，文件夹名命中可直接进入；↩ 打开链接，⌘C 复制链接，⇧⌘C 复制标题 |
+| 收藏当前页面（add-bookmark） | 抓取浏览器当前活动标签页；首项「存为未分类」，其余为已有文件夹列表（来自 `folders.json`），回车存入并弹 toast 确认 |
+
+首次使用收藏命令时 Raycast 会提示安装官方浏览器扩展（Chrome / Edge / Arc / Firefox 等均有）并授权标签页访问，按引导完成即可。缓存目录默认 `~/.markmax`，可在扩展偏好中修改（需与 CLI daemon 一致）。
+
+---
+
 ## 目录结构
 
 ```text
