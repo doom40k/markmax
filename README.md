@@ -259,7 +259,7 @@ brew services start markmax   # 常驻后台（用户态 LaunchAgent，keep_aliv
 brew services stop markmax    # 停止
 ```
 
-日志输出到 `/tmp/markmax.log`。升级方式：主仓库打新 tag（CI 自动构建双架构产物并附到 release）→ 更新 tap 中 formula 的 version 与 sha256 → `brew upgrade markmax`。
+日志输出到 `$(brew --prefix)/var/log/markmax.log`（Homebrew 规范位置）。升级方式：主仓库打新 tag（CI 自动构建双架构产物并附到 release）→ 更新 tap 中 formula 的 version 与 sha256 → `brew upgrade markmax`。
 
 ### 从源码构建
 

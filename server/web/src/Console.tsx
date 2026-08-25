@@ -3,6 +3,7 @@ import { AuthError, type Api } from './api'
 import type { Bookmark, BookmarkInput, FolderInfo, ImportItem } from './types'
 import { BookmarkForm } from './components/BookmarkForm'
 import { BookmarkList } from './components/BookmarkList'
+import { ConfirmDialog } from './components/ConfirmDialog'
 import { ImportModal } from './components/ImportModal'
 import { Sidebar } from './components/Sidebar'
 import { Toast } from './components/Toast'
@@ -27,6 +28,7 @@ export function Console({ api, onDisconnect }: Props) {
   const [formOpen, setFormOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
   const [editing, setEditing] = useState<Bookmark | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Bookmark | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -109,6 +111,7 @@ export function Console({ api, onDisconnect }: Props) {
   async function handleCreate(input: BookmarkInput) {
     const created = await api.create(input)
     setAll((prev) => [created, ...prev])
+    await refreshFolders()
     notify('书签已创建')
   }
 
@@ -116,14 +119,20 @@ export function Console({ api, onDisconnect }: Props) {
     const updated = await api.update(id, input)
     setAll((prev) => prev.map((b) => (b.id === id ? updated : b)))
     setTrash((prev) => prev.map((b) => (b.id === id ? updated : b)))
+    await refreshFolders()
     notify('书签已更新')
   }
 
   async function handleDelete(b: Bookmark) {
-    if (!window.confirm(`将「${b.title || b.url}」移入回收站？`)) return
+    setDeleteTarget(b)
+  }
+
+  async function handleDeleteConfirmed(b: Bookmark) {
     await api.remove(b.id)
+    setDeleteTarget(null)
     setAll((prev) => prev.filter((x) => x.id !== b.id))
     setTrash((prev) => [b, ...prev])
+    await refreshFolders()
     notify('已移入回收站')
   }
 
@@ -131,6 +140,7 @@ export function Console({ api, onDisconnect }: Props) {
     const restored = await api.restore(b.id)
     setTrash((prev) => prev.filter((x) => x.id !== b.id))
     setAll((prev) => [restored, ...prev])
+    await refreshFolders()
     notify('已恢复')
   }
 
@@ -240,6 +250,15 @@ export function Console({ api, onDisconnect }: Props) {
             setFormOpen(false)
             void refreshFolders()
           }}
+        />
+      )}
+      {deleteTarget && (
+        <ConfirmDialog
+          title="移入回收站"
+          message={`将「${deleteTarget.title || deleteTarget.url}」移入回收站？`}
+          confirmText="移入回收站"
+          onConfirm={() => void handleDeleteConfirmed(deleteTarget)}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
       <Toast message={toast} />
