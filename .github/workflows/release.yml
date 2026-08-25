@@ -1,0 +1,48 @@
+# tag 推送时构建 CLI 二进制并附到 GitHub Release，供 Homebrew formula 直接下载
+# 产物命名：markmax-sync-<tag>-<target>.tar.gz（内含单个 markmax-sync 可执行文件）
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest # Apple Silicon
+            target: aarch64-apple-darwin
+          - os: macos-13 # Intel
+            target: x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    env:
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        working-directory: cli
+        run: cargo build --release --locked
+
+      - name: Package
+        run: |
+          VER="${GITHUB_REF_NAME}"
+          mkdir -p pkg
+          cp "cli/target/release/markmax-sync" "pkg/markmax-sync"
+          tar -czf "markmax-sync-${VER}-${TARGET}.tar.gz" -C pkg markmax-sync
+          shasum -a 256 "markmax-sync-${VER}-${TARGET}.tar.gz" > "markmax-sync-${VER}-${TARGET}.tar.gz.sha256"
+          cat "markmax-sync-${VER}-${TARGET}.tar.gz.sha256"
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            markmax-sync-*-${{ env.TARGET }}.tar.gz
+            markmax-sync-*-${{ env.TARGET }}.tar.gz.sha256
