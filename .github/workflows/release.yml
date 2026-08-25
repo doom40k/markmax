@@ -121,11 +121,11 @@ jobs:
           done
 
       - name: Remove per-arch tags
+        # regctl 复用上方 docker login 写入的凭据（Docker Hub 登录不需要指定 host）
         run: |
           VER="${VERSION#v}"
           curl -sSLo /usr/local/bin/regctl \
             https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64
           chmod +x /usr/local/bin/regctl
-          regctl registry login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}" registry-1.docker.io
           regctl tag rm "$IMAGE:$VER-linux-amd64"
           regctl tag rm "$IMAGE:$VER-linux-arm64"
