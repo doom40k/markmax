@@ -4,8 +4,9 @@ target/
 # node
 node_modules/
 
-# build output（alfred/dist 是分发包，需入库）
+# build output（alfred/dist 是分发包，需入库；raycast/dist 是编译产物，不入库）
 /server/web/dist/
+raycast/dist/
 
 # runtime data (sqlite db, generated token)
 data/
