@@ -119,17 +119,5 @@ jobs:
               --amend "$IMAGE:$VER-linux-arm64"
             docker manifest push "$IMAGE:$tag"
           done
-
-      - name: Remove per-arch tags
-        # 直接调 Docker Hub API 删除临时 tag（凭据用仓库 Secrets，不依赖 regctl 读取 docker config）
-        run: |
-          VER="${VERSION#v}"
-          TOKEN="$(curl -s -X POST https://hub.docker.com/v2/users/login \
-            -H 'Content-Type: application/json' \
-            -d '{"username":"${{ secrets.DOCKERHUB_USERNAME }}","password":"${{ secrets.DOCKERHUB_TOKEN }}"}' \
-            | python3 -c 'import json,sys; print(json.load(sys.stdin)["token"])')"
-          for t in "$VER-linux-amd64" "$VER-linux-arm64"; do
-            curl -fs -o /dev/null -w "DELETE $t -> %{http_code}\n" \
-              -X DELETE -H "Authorization: JWT $TOKEN" \
-              "https://hub.docker.com/v2/repositories/$IMAGE/tags/$t/"
-          done
+        # 注：不删除 $VER-linux-amd64 / $VER-linux-arm64 临时 tag（Docker Hub token
+        # 未授予 delete 权限会 403）；如需清理，给 token 加 delete 权限后再加清理步骤
