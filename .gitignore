@@ -4,8 +4,8 @@ target/
 # node
 node_modules/
 
-# build output
-dist/
+# build output（alfred/dist 是分发包，需入库）
+/server/web/dist/
 
 # runtime data (sqlite db, generated token)
 data/
