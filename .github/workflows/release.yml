@@ -121,11 +121,14 @@ jobs:
           done
 
       - name: Remove per-arch tags
-        # regctl 复用上方 docker login 写入的凭据（Docker Hub 登录不需要指定 host）
+        # 直接调 Docker Hub API 删除临时 tag（凭据用仓库 Secrets，不依赖 regctl 读取 docker config）
         run: |
           VER="${VERSION#v}"
-          curl -sSLo /usr/local/bin/regctl \
-            https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64
-          chmod +x /usr/local/bin/regctl
-          regctl tag rm "$IMAGE:$VER-linux-amd64"
-          regctl tag rm "$IMAGE:$VER-linux-arm64"
+          TOKEN="$(curl -s -X POST https://hub.docker.com/v2/users/login \
+            -H 'Content-Type: application/json' \
+            -d '{"username":"${{ secrets.DOCKERHUB_USERNAME }}","password":"${{ secrets.DOCKERHUB_TOKEN }}"}' \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["token"])')"
+          for t in "$VER-linux-amd64" "$VER-linux-arm64"; do
+            curl -s -o /dev/null -X DELETE -H "Authorization: JWT $TOKEN" \
+              "https://hub.docker.com/v2/repositories/$IMAGE/tags/$t/"
+          done
