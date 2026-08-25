@@ -1,6 +1,6 @@
 # markmax
 
-轻量自托管书签管理。Chrome 插件管理书签，服务端集中存储与备份；可选安装桌面效率工具（Alfred workflow）与本机同步 CLI，让书签在本地秒级可查。
+轻量自托管书签管理。Chrome 插件管理书签，服务端集中存储与备份；可选安装桌面效率插件（Alfred workflow / Raycast 插件）与本机同步 CLI，让书签在本地秒级可查。
 
 ## 架构
 
@@ -16,11 +16,12 @@
 └──────────────▲─────────────────────────┘
                │ 监听文件变化 + 定时拉取（可选组件）
       ┌────────┴─────────┐
-      │ markmax-sync CLI │ ← brew services 常驻后台，仅 Alfred/桌面效率工具需要
+      │ markmax-sync CLI │ ← brew services 常驻后台，仅桌面效率插件需要
       └────────▲─────────┘
                │ 直接读写缓存
       ┌────────┴─────────┐
       │ Alfred mk / mka  │
+      │ Raycast 搜索/收藏 │
       └──────────────────┘
 ```
 
@@ -28,7 +29,7 @@
 | --- | --- | --- |
 | `server/` | 服务端 | Rust (axum + sqlite) + React/Tailwind 管理界面（**必装**） |
 | `extension/` | Chrome 插件 (MV3) | 直连服务端 REST API，跨浏览器通用（**必装**） |
-| `cli/` | 本机同步工具 | 维护本地缓存供桌面效率工具秒级读取；文件变更即时同步 + 定时同步（**可选**，仅使用 Alfred 等效率工具时需要） |
+| `cli/` | 本机同步工具 | 维护本地缓存供桌面效率插件秒级读取；文件变更即时同步 + 定时同步（**可选**，仅使用 Alfred / Raycast 时需要） |
 | `alfred/` | Alfred workflow | `mk` 搜索浏览、`mka` 快速新增（**可选**） |
 | `raycast/` | Raycast 插件 | 与 Alfred 插件功能对等，直接读写本机缓存（**可选**） |
 
@@ -75,9 +76,9 @@ docker run -d --name markmax -p 8080:8080 -v markmax-data:/data \
 
 日常使用：浏览器里用插件增删改书签；Web 管理界面（http://localhost:8080）提供完整管理能力（搜索、文件夹、标签、回收站、批量导入）。数据全部存在服务端，换机器无需迁移。
 
-### 可选：Alfred 效率插件（需要本机同步 CLI）
+### 可选：桌面效率插件（Alfred / Raycast，需要本机同步 CLI）
 
-不装 Alfred 则本步完全跳过。CLI 的目的是在本地维护一份书签缓存，让 Alfred 搜索**不经过网络、毫秒级出结果**；装了 Alfred workflow 就同时需要常驻的 CLI 保持缓存新鲜。
+不装效率插件则本步完全跳过。CLI 的目的是在本地维护一份书签缓存，让效率插件搜索**不经过网络、毫秒级出结果**；装了插件就同时需要常驻的 CLI 保持缓存新鲜。
 
 ```bash
 # 1. 安装 CLI（CI 预编译二进制，秒装，无需 Rust 环境）
@@ -88,7 +89,8 @@ brew install doom40k/tools/markmax
 markmax-sync --config          # 缓存目录(默认 ~/.markmax) + 服务端地址 + API token
 brew services start markmax    # LaunchAgent 常驻，崩溃自动拉起
 
-# 3. 安装 Alfred workflow：双击 alfred/dist/markmax.alfredworkflow
+# 3a. 安装 Alfred workflow：双击 alfred/dist/markmax.alfredworkflow
+# 3b. 或安装 Raycast 插件：见 raycast/README.md（构建后导入 dist 目录）
 ```
 
 > 本地缓存 `~/.markmax/bookmarks.json` 是开放格式（见「cli — 缓存目录格式」），你可以自己写 Keyboard Maestro / 命令行脚本等工具直接读取它，不依赖 Alfred 与 markmax-sync。**仓库已内置 Raycast 插件**（`raycast/`，与 Alfred 功能对等），安装见 `raycast/README.md`。
