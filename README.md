@@ -1,6 +1,6 @@
 # markmax
 
-轻量自托管书签管理。Chrome 插件管理书签，服务端集中存储与备份，本机 daemon 自动同步；配套 Alfred 搜索 / 快速新增。
+轻量自托管书签管理。Chrome 插件管理书签，服务端集中存储与备份；可选安装桌面效率工具（Alfred workflow）与本机同步 CLI，让书签在本地秒级可查。
 
 ## 架构
 
@@ -12,11 +12,11 @@
      │ 读写                             │ POST /api/sync
      ▼                                  │ 双向增量同步
 ┌──────────────────────────────────────┴─┐
-│ ~/.markmax/bookmarks.json（共享缓存）   │
+│ ~/.markmax/bookmarks.json（本地缓存）   │ ← 开放格式，任何工具可读
 └──────────────▲─────────────────────────┘
-               │ 监听文件变化 + 定时拉取
+               │ 监听文件变化 + 定时拉取（可选组件）
       ┌────────┴─────────┐
-      │ markmax-sync CLI │ ← brew services 常驻后台
+      │ markmax-sync CLI │ ← brew services 常驻后台，仅 Alfred/桌面效率工具需要
       └────────▲─────────┘
                │ 直接读写缓存
       ┌────────┴─────────┐
@@ -26,10 +26,10 @@
 
 | 目录 | 端 | 说明 |
 | --- | --- | --- |
-| `server/` | 服务端 | Rust (axum + sqlite) + React/Tailwind 管理界面 |
-| `extension/` | Chrome 插件 (MV3) | 直连服务端 REST API，跨浏览器通用 |
-| `cli/` | 本机同步工具 | 与插件共享缓存目录，文件变更即时同步 + 定时同步 |
-| `alfred/` | Alfred workflow | `mk` 搜索浏览、`mka` 快速新增 |
+| `server/` | 服务端 | Rust (axum + sqlite) + React/Tailwind 管理界面（**必装**） |
+| `extension/` | Chrome 插件 (MV3) | 直连服务端 REST API，跨浏览器通用（**必装**） |
+| `cli/` | 本机同步工具 | 维护本地缓存供桌面效率工具秒级读取；文件变更即时同步 + 定时同步（**可选**，仅使用 Alfred 等效率工具时需要） |
+| `alfred/` | Alfred workflow | `mk` 搜索浏览、`mka` 快速新增（**可选**） |
 
 ## 界面预览
 
@@ -58,7 +58,9 @@
 
 ## 快速开始
 
-从零到可用共四步：
+从零到可用分两步（必装），桌面效率工具（Alfred / Raycast 等）为可选附加。
+
+### 必装：服务端 + Chrome 插件
 
 ```bash
 # 1. 启动服务端（Docker Hub 镜像，amd64/arm64）
@@ -66,20 +68,29 @@ docker run -d --name markmax -p 8080:8080 -v markmax-data:/data \
   --restart unless-stopped doom40k/markmax-server
 # token 在日志里打印，同时持久化在容器 /data/token
 
-# 2. 本机安装同步 CLI（Homebrew）
+# 2. 加载 Chrome 插件：chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → 选 extension/
+#    点插件图标 → 填服务端地址 + token → 连接
+```
+
+日常使用：浏览器里用插件增删改书签；Web 管理界面（http://localhost:8080）提供完整管理能力（搜索、文件夹、标签、回收站、批量导入）。数据全部存在服务端，换机器无需迁移。
+
+### 可选：Alfred 效率插件（需要本机同步 CLI）
+
+不装 Alfred 则本步完全跳过。CLI 的目的是在本地维护一份书签缓存，让 Alfred 搜索**不经过网络、毫秒级出结果**；装了 Alfred workflow 就同时需要常驻的 CLI 保持缓存新鲜。
+
+```bash
+# 1. 安装 CLI（CI 预编译二进制，秒装，无需 Rust 环境）
 brew tap doom40k/tools https://github.com/doom40k/homebrew-tools
 brew install doom40k/tools/markmax
 
-# 3. 配置并常驻后台
+# 2. 配置并常驻后台（首次配置需交互式）
 markmax-sync --config          # 缓存目录(默认 ~/.markmax) + 服务端地址 + API token
 brew services start markmax    # LaunchAgent 常驻，崩溃自动拉起
 
-# 4a. 加载 Chrome 插件：chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → 选 extension/
-#     点插件图标 → 填服务端地址 + token → 连接
-# 4b. （可选）安装 Alfred workflow：双击 alfred/dist/markmax.alfredworkflow
+# 3. 安装 Alfred workflow：双击 alfred/dist/markmax.alfredworkflow
 ```
 
-日常使用：浏览器里用插件或 Web 管理界面（http://localhost:8080）增删改书签 → CLI 自动同步备份到服务端；换机器装同样一套即可拉取全部书签。
+> 本地缓存 `~/.markmax/bookmarks.json` 是开放格式（见「cli — 缓存目录格式」），你也可以自己写 Raycast / Raycast Script / Keyboard Maestro / 命令行脚本等工具直接读取它，不依赖 Alfred 与 markmax-sync。
 
 ---
 
@@ -226,9 +237,11 @@ CLI 与服务端之间的同步，单次请求完成双向：
 
 ---
 
-## cli — 本机同步工具
+## cli — 本机同步工具（可选）
 
-Rust CLI，作为后台服务运行：**缓存目录下的 bookmarks.json 一变（插件/Alfred 改动），立即同步到服务端；同时每 3 分钟定时拉取服务端变更**，双向同步按 `updated_at` 最后写入者胜。
+**非必装组件**：只有使用 Alfred 等桌面效率工具时才需要。它的职责是把服务端的书签同步一份到本地缓存 `~/.markmax/bookmarks.json`，并作为后台服务（`brew services` 常驻）监听文件变化即时同步、每 3 分钟定时拉取服务端变更（双向同步按 `updated_at` 最后写入者胜）。
+
+效率工具的搜索直接读本地缓存、不走网络，因此毫秒级出结果；缓存也是开放格式，其它工具可自行读取（见下）。
 
 ### 安装（Homebrew）
 
@@ -269,17 +282,16 @@ cd cli && cargo install --path .   # 或 cargo build --release
 | `remove <id> [--notify]` | 移入回收站（软删除） |
 | `install-alfred` | 把 Alfred workflow 安装到 Alfred 配置目录（注入二进制绝对路径） |
 
-### 缓存目录格式（与 Chrome 插件 / Alfred 共享）
+### 缓存目录格式（开放格式，第三方工具可读）
 
 ```text
 ~/.markmax/
 ├── markmax-config.json  # 全局配置：{ cache_dir, server, token, last_sync }
 ├── bookmarks.json       # 书签数据（原子写入）
-├── folders.json         # 已有文件夹列表（Alfred mka 的选择项来源）
-└── token                # （仅服务端）生成的 API token
+└── folders.json         # 已有文件夹列表（Alfred mka 的选择项来源）
 ```
 
-`bookmarks.json` 单条记录结构见文首数据模型。约定：
+`bookmarks.json` 单条记录结构见文首数据模型。**这是稳定的开放格式**：如果你要自己写 Raycast / Keyboard Maestro / 终端脚本等工具，直接读取该文件即可，无需依赖 Alfred workflow 或 markmax-sync 的其它能力；用 `markmax-sync search <词>` 命令也能拿到同样的结构化输出。约定：
 
 - 其它进程增删改：直接改写 `bookmarks.json`（保留完整字段即可），CLI 监听文件变化后自动同步。
 - 删除用软删除（`deleted: true` + `deleted_at`），同步确认后 CLI 会自动清理 tombstone。
