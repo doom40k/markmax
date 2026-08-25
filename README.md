@@ -147,6 +147,19 @@ docker run -d -p 9000:9000 \
 
 > 注意：不要用 `docker run … markmax-server --port xxx` 覆盖端口——CLI 参数优先级高于环境变量，会令 `MARKMAX_PORT` 失效。镜像已内置默认值，直接用环境变量即可。
 
+#### 更新服务端
+
+新版本发布后（主仓库打新 tag，CI 自动构建并推送 `doom40k/markmax-server:<版本>` 与 `latest`），更新容器：
+
+```bash
+docker pull doom40k/markmax-server        # 拉取 latest
+# 或指定版本：docker pull doom40k/markmax-server:0.1.9
+
+docker rm -f markmax                     # 停止并删除旧容器（数据在 volume 中不受影响）
+docker run -d --name markmax -p 8080:8080 -v markmax-data:/data \
+  --restart unless-stopped doom40k/markmax-server
+```
+
 升级：主仓库打新 tag 后 CI 自动推送新镜像，`docker pull doom40k/markmax-server && docker rm -f markmax && docker run …`（数据在 volume 中不受影响）。
 
 #### 方式二：直接运行（需要 Rust 工具链）
@@ -259,7 +272,17 @@ brew services start markmax   # 常驻后台（用户态 LaunchAgent，keep_aliv
 brew services stop markmax    # 停止
 ```
 
-日志输出到 `$(brew --prefix)/var/log/markmax.log`（Homebrew 规范位置）。升级方式：主仓库打新 tag（CI 自动构建双架构产物并附到 release）→ 更新 tap 中 formula 的 version 与 sha256 → `brew upgrade markmax`。
+日志输出到 `$(brew --prefix)/var/log/markmax.log`（Homebrew 规范位置）。
+
+#### 更新 CLI
+
+```bash
+brew update && brew upgrade markmax      # 拉取新 formula 并升级二进制
+brew services restart markmax            # 重启后台服务使新版本生效
+markmax-sync --version                   # 确认版本
+```
+
+> 发布链路：主仓库改版本号 → 打新 tag → CI 自动构建双架构二进制附到 release → 更新 tap 中 formula 的 version 与 sha256 → 用户 `brew upgrade` 生效。
 
 ### 从源码构建
 
