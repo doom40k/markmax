@@ -149,18 +149,29 @@ docker run -d -p 9000:9000 \
 
 #### 更新服务端
 
-新版本发布后（主仓库打新 tag，CI 自动构建并推送 `doom40k/markmax-server:<版本>` 与 `latest`），更新容器：
+新版本发布后（主仓库打新 tag，CI 自动构建并推送 `doom40k/markmax-server:<版本>` 与 `latest`），按以下流程更新容器。数据全部在 Docker volume（`markmax-data`）里，重建容器不会丢失任何书签；不放心可先备份：`docker run --rm -v markmax-data:/data -v $(pwd):/backup alpine tar czf /backup/markmax-backup.tar.gz -C /data .`
 
 ```bash
-docker pull doom40k/markmax-server        # 拉取 latest
-# 或指定版本：docker pull doom40k/markmax-server:0.1.9
+# 1. 查看当前容器状态与镜像版本
+docker ps --filter name=markmax          # 容器在运行即正常
+docker inspect markmax --format '{{.Image}}'   # 当前镜像
 
-docker rm -f markmax                     # 停止并删除旧容器（数据在 volume 中不受影响）
+# 2. 拉取新镜像（默认 latest；要固定版本用 :0.1.9 等 tag）
+docker pull doom40k/markmax-server
+
+# 3. 停止并删除旧容器（volume 数据保留）
+docker rm -f markmax
+
+# 4. 用相同的参数重新创建容器（如改过端口/token，保持与原来一致）
 docker run -d --name markmax -p 8080:8080 -v markmax-data:/data \
   --restart unless-stopped doom40k/markmax-server
+
+# 5. 验证
+docker ps --filter name=markmax
+curl -s http://localhost:8080/api/health   # 期望 {"status":"ok",...}
 ```
 
-升级：主仓库打新 tag 后 CI 自动推送新镜像，`docker pull doom40k/markmax-server && docker rm -f markmax && docker run …`（数据在 volume 中不受影响）。
+> 镜像 tag 说明：`latest` 总指向最新版，跟随自动更新；生产环境建议固定具体版本 tag（如 `:0.1.9`），确认无问题后再手动升级，避免 `latest` 意外变更。
 
 #### 方式二：直接运行（需要 Rust 工具链）
 
