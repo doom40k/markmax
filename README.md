@@ -98,7 +98,7 @@ Rust 实现，SQLite（WAL）存储，提供 REST API + 静态托管的 Web 管�
 
 #### 方式一：Docker（推荐）
 
-官方镜像发布在 Docker Hub，支持 `linux/amd64` 与 `linux/arm64`：
+官方镜像发布在 Docker Hub（`linux/amd64`）：
 
 ```bash
 docker run -d --name markmax \
