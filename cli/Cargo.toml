@@ -1,6 +1,6 @@
 [package]
 name = "markmax-sync"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "markmax bookmark local sync daemon（与 Chrome 插件共享缓存目录）"
 
