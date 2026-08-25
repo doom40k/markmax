@@ -4,8 +4,10 @@
 # 双架构均在 Apple Silicon runner 上构建：aarch64 原生编译，
 # x86_64 交叉编译（macOS 工具链原生支持，避免依赖已停供的 Intel runner）
 #
-# 同时构建服务端镜像（linux/amd64）并推送到 Docker Hub：doom40k/markmax-server
+# 同时构建服务端多架构镜像（linux/amd64 + linux/arm64）并推送到 Docker Hub：doom40k/markmax-server
 # 需要在仓库 Secrets 配置 DOCKERHUB_USERNAME / DOCKERHUB_TOKEN
+# 两个平台分别在原生 runner 上构建（arm64 用 GitHub 公开仓库免费的 ubuntu-24.04-arm），
+# 避免 QEMU 模拟编译慢；随后由 docker-merge job 合成多架构 manifest
 name: release
 
 on:
@@ -57,9 +59,17 @@ jobs:
             markmax-sync-*-${{ env.TARGET }}.tar.gz.sha256
 
   docker:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.meta.outputs.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            suffix: linux-amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            suffix: linux-arm64
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
 
@@ -74,16 +84,47 @@ jobs:
         id: meta
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
+      # 先推到带平台后缀的临时 tag（如 0.1.3-linux-arm64），再由 docker-merge 合成多架构 manifest
       - uses: docker/build-push-action@v6
         with:
           context: ./server
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           push: true
           tags: |
-            ${{ env.IMAGE }}:${{ steps.meta.outputs.version }}
-            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.version }}-${{ matrix.suffix }}
           labels: |
             org.opencontainers.image.version=${{ steps.meta.outputs.version }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  docker-merge:
+    needs: docker
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.ref_name }}
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create multi-arch manifest
+        run: |
+          VER="${VERSION#v}"
+          for tag in "$VER" "latest"; do
+            docker manifest create "$IMAGE:$tag" \
+              --amend "$IMAGE:$VER-linux-amd64" \
+              --amend "$IMAGE:$VER-linux-arm64"
+            docker manifest push "$IMAGE:$tag"
+          done
+
+      - name: Remove per-arch tags
+        run: |
+          VER="${VERSION#v}"
+          curl -sSLo /usr/local/bin/regctl \
+            https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64
+          chmod +x /usr/local/bin/regctl
+          regctl registry login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}" registry-1.docker.io
+          regctl tag rm "$IMAGE:$VER-linux-amd64" "$IMAGE:$VER-linux-arm64"
