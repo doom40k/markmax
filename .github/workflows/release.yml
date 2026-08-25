@@ -3,6 +3,9 @@
 #
 # 双架构均在 Apple Silicon runner 上构建：aarch64 原生编译，
 # x86_64 交叉编译（macOS 工具链原生支持，避免依赖已停供的 Intel runner）
+#
+# 同时构建服务端多架构镜像（amd64/arm64）并推送到 Docker Hub：doom40k/markmax-server
+# 需要在仓库 Secrets 配置 DOCKERHUB_USERNAME / DOCKERHUB_TOKEN
 name: release
 
 on:
@@ -11,6 +14,9 @@ on:
 
 permissions:
   contents: write
+
+env:
+  IMAGE: doom40k/markmax-server
 
 jobs:
   build:
@@ -49,3 +55,38 @@ jobs:
           files: |
             markmax-sync-*-${{ env.TARGET }}.tar.gz
             markmax-sync-*-${{ env.TARGET }}.tar.gz.sha256
+
+  docker:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # arm64 用 QEMU 模拟构建，Rust 编译较慢；gha 缓存可显著加速后续构建
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Derive image tag
+        id: meta
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.version }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -23,4 +23,5 @@ ENV MARKMAX_WEB_DIR=/app/web/dist
 VOLUME ["/data"]
 EXPOSE 8080
 ENTRYPOINT ["markmax-server"]
-CMD ["--port", "8080"]
+# 端口/数据目录/token 均可用环境变量覆盖（MARKMAX_PORT / MARKMAX_DATA_DIR / MARKMAX_TOKEN），
+# 不在 CMD 写死 --port，否则 CLI 参数优先级高于环境变量会导致覆盖失效。
