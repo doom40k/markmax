@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, getSelectedBrowserTab, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { ActionPanel, BrowserExtension, getPreferenceValues, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { addBookmark, readFolders, resolveCacheDir } from "./cache";
 import { TabInfo } from "./types";
@@ -27,12 +27,14 @@ export default function AddBookmark() {
 
   async function getSelectedTab() {
     try {
-      const t = await getSelectedBrowserTab();
-      if (!t || !t.url) {
+      // 新版 BrowserExtension API：返回所有标签页，取活动标签（需安装 Raycast 浏览器扩展，首次使用会引导授权）
+      const tabs = await BrowserExtension.getTabs();
+      const active = tabs.find((t) => t.active) ?? tabs[0];
+      if (!active || !active.url) {
         setError("未获取到活动标签页（需在浏览器前台触发）");
         return;
       }
-      setTab({ title: t.title ?? "", url: t.url });
+      setTab({ title: active.title ?? "", url: active.url });
     } catch (e) {
       setError(`获取标签页失败：${String(e)}`);
     }
