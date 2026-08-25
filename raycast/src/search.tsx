@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation, getPreferenceValues, type ReactElement } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { matchesWords, readBookmarks, resolveCacheDir } from "./cache";
+import { matchesWords, readBookmarks, readFolders, resolveCacheDir } from "./cache";
 import { Bookmark } from "./types";
 
 interface Preferences {
