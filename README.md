@@ -376,7 +376,7 @@ MV3 插件，Vercel 黑白风格，**直连服务端 REST API**（跨浏览器�
 
 ## raycast — Raycast 插件
 
-与 Alfred 插件功能对等，**直接读写本机缓存**（不经 CLI 二进制），两者可并存。前置与 Alfred 相同：CLI daemon 常驻（`brew services start markmax`）保持缓存新鲜并同步到服务端。
+与 Alfred 插件功能对等，两者可并存。与 Alfred 的区别：**代码上不依赖 CLI 二进制**——搜索直接读本机缓存，收藏直接原子写入缓存（不经任何外部命令）。但仍需 CLI daemon 常驻（`brew services start markmax`）：daemon 是缓存与服务端之间的搬运工，没有它缓存就是死数据——搜索结果不会更新，收藏的书签也不会同步到服务端。
 
 ### 安装
 
