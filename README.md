@@ -31,6 +31,12 @@
 | `cli/` | 本机同步工具 | 与插件共享缓存目录，文件变更即时同步 + 定时同步 |
 | `alfred/` | Alfred workflow | `mk` 搜索浏览、`mka` 快速新增 |
 
+## 界面预览
+
+| Chrome 插件 | Web 管理端 | Alfred 插件 |
+| --- | --- | --- |
+| <img src="screenshoot/chrome-extension.jpg" width="220"> | <img src="screenshoot/web.jpg" width="480"> | <img src="screenshoot/alfred.jpg" width="400"> |
+
 数据模型（三端统一）：书签为扁平记录，`folder` 为 `/` 分层的字符串路径（如 `工作/项目A`）；时间戳统一 unix 毫秒；删除一律软删除（`deleted` + `deleted_at`），以便多端传播。
 
 ```json

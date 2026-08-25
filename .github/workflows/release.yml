@@ -129,6 +129,7 @@ jobs:
             -d '{"username":"${{ secrets.DOCKERHUB_USERNAME }}","password":"${{ secrets.DOCKERHUB_TOKEN }}"}' \
             | python3 -c 'import json,sys; print(json.load(sys.stdin)["token"])')"
           for t in "$VER-linux-amd64" "$VER-linux-arm64"; do
-            curl -s -o /dev/null -X DELETE -H "Authorization: JWT $TOKEN" \
+            curl -fs -o /dev/null -w "DELETE $t -> %{http_code}\n" \
+              -X DELETE -H "Authorization: JWT $TOKEN" \
               "https://hub.docker.com/v2/repositories/$IMAGE/tags/$t/"
           done
