@@ -70,7 +70,8 @@ docker run -d --name markmax -p 8080:8080 -v markmax-data:/data \
   --restart unless-stopped doom40k/markmax-server
 # token 在日志里打印，同时持久化在容器 /data/token
 
-# 2. 加载 Chrome 插件：chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → 选 extension/
+# 2. 安装 Chrome 插件：从 Releases 页下载 markmax-extension-<版本>.zip 并解压
+#    chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → 选解压出的 markmax-extension 目录
 #    点插件图标 → 填服务端地址 + token → 连接
 ```
 
@@ -342,8 +343,11 @@ MV3 插件，Vercel 黑白风格，**直连服务端 REST API**（跨浏览器�
 
 ### 安装
 
-1. 打开 `chrome://extensions`（Brave 为 `brave://extensions`）→ 开发者模式 → 「加载已解压的扩展程序」→ 选择 `extension/` 目录
-2. 点插件图标 → 填写服务端地址（如 http://localhost:8080）与 API token（服务端启动日志或 `server/data/token`）→ 连接
+1. 从 [Releases](https://github.com/doom40k/markmax/releases) 下载最新的 `markmax-extension-<版本>.zip`（附带 `.sha256` 校验文件）并解压
+2. 打开 `chrome://extensions`（Brave 为 `brave://extensions`）→ 开发者模式 → 「加载已解压的扩展程序」→ 选择解压出的 `markmax-extension` 目录
+3. 点插件图标 → 填写服务端地址（如 http://localhost:8080）与 API token（服务端启动日志或 `server/data/token`）→ 连接
+
+> 插件无构建步骤（纯静态文件），CI 打包时会把 manifest 版本号同步为 release tag 版本，解压即用，无需 clone 仓库。从源码安装：clone 后直接加载 `extension/` 目录（开发者日常开发用这种方式）。
 
 ### 功能
 

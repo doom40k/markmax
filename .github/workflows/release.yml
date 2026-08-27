@@ -8,6 +8,10 @@
 # 需要在仓库 Secrets 配置 DOCKERHUB_USERNAME / DOCKERHUB_TOKEN
 # 两个平台分别在原生 runner 上构建（arm64 用 GitHub 公开仓库免费的 ubuntu-24.04-arm），
 # 避免 QEMU 模拟编译慢；随后由 docker-merge job 合成多架构 manifest
+#
+# 另将 Chrome 插件打成 zip 附到 Release（extension job）：
+# 产物命名 markmax-extension-<版本>.zip，解压后即「加载已解压的扩展程序」可用的目录；
+# 插件无构建步骤（纯静态文件），打包时仅同步 manifest 版本号到 release tag
 name: release
 
 on:
@@ -57,6 +61,33 @@ jobs:
           files: |
             markmax-sync-*-${{ env.TARGET }}.tar.gz
             markmax-sync-*-${{ env.TARGET }}.tar.gz.sha256
+
+  # Chrome 插件打包：无构建步骤，同步版本号到 tag 后打 zip。
+  # 目录显式列出（manifest/icons/lib/options/popup/shared.css），
+  # 新增顶层文件时需同步这里，避免开发工具（tools/）等无关内容混入分发包。
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          mkdir -p stage/markmax-extension
+          # 插件版本跟随仓库 release tag，避免与发布版本漂移
+          jq --arg v "$VER" '.version = $v' extension/manifest.json > stage/markmax-extension/manifest.json
+          cp -r extension/icons extension/lib extension/options extension/popup extension/shared.css stage/markmax-extension/
+          (cd stage && zip -qr "../markmax-extension-${VER}.zip" markmax-extension)
+          unzip -l "markmax-extension-${VER}.zip"
+          shasum -a 256 "markmax-extension-${VER}.zip" > "markmax-extension-${VER}.zip.sha256"
+          cat "markmax-extension-${VER}.zip.sha256"
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            markmax-extension-*.zip
+            markmax-extension-*.zip.sha256
 
   docker:
     strategy:
