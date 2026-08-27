@@ -75,7 +75,7 @@ docker run -d --name markmax -p 8080:8080 -v markmax-data:/data \
 #    点插件图标 → 填服务端地址 + token → 连接
 ```
 
-日常使用：浏览器里用插件增删改书签；Web 管理界面（http://localhost:8080）提供完整管理能力（搜索、文件夹、标签、回收站、批量导入）。数据全部存在服务端，换机器无需迁移。
+日常使用：浏览器里用插件增删改书签；Web 管理界面（http://localhost:8080）提供完整管理能力（搜索、文件夹、标签、回收站、批量导入）。界面已适配手机端：手机浏览器直接打开即可用，也可「添加到主屏幕」以全屏 PWA 方式使用，无需安装 App。数据全部存在服务端，换机器无需迁移。
 
 ### 可选：桌面效率插件（Alfred / Raycast，需要本机同步 CLI）
 
@@ -100,7 +100,7 @@ brew services start markmax    # LaunchAgent 常驻，崩溃自动拉起
 
 ## server — 服务端
 
-Rust 实现，SQLite（WAL）存储，提供 REST API + 静态托管的 Web 管理界面（React + Tailwind，Vercel 风格黑白配色）。Web 界面支持搜索、新建编辑、文件夹树管理（新建/重命名/删除）、标签过滤、回收站恢复、批量导入书签 HTML。
+Rust 实现，SQLite（WAL）存储，提供 REST API + 静态托管的 Web 管理界面（React + Tailwind，Vercel 风格黑白配色）。Web 界面支持搜索、新建编辑、文件夹树管理（新建/重命名/删除）、标签过滤、回收站恢复、批量导入书签 HTML；响应式布局，窄屏下侧边栏变为抽屉、操作直接可点，并支持 PWA 添加到主屏幕（iOS / Android，图标全屏、无地址栏）。
 
 ### 配置
 
