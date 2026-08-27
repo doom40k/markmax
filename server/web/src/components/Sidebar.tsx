@@ -264,7 +264,9 @@ export function Sidebar({
 
   return (
     <aside
-      className={`${mobileOpen ? 'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] shadow-2xl' : 'hidden'} md:static md:z-auto md:flex md:w-60 md:max-w-none md:shadow-none shrink-0 flex-col border-r border-[#e5e5e5] bg-[#fafafa]`}
+      className={`fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] shrink-0 flex-col border-r border-[#e5e5e5] bg-[#fafafa] shadow-2xl transition-transform duration-300 ease-out motion-reduce:transition-none ${
+        mobileOpen ? 'translate-x-0' : 'pointer-events-none -translate-x-full'
+      } md:static md:z-auto md:w-60 md:max-w-none md:translate-x-0 md:shadow-none md:transition-none`}
     >
       <div className="flex items-center gap-2 px-4 pb-4 pt-5">
         <div className="flex h-7 w-7 items-center justify-center bg-black font-mono text-sm font-semibold text-white">

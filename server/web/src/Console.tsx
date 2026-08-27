@@ -71,6 +71,14 @@ export function Console({ api, onDisconnect }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // 抽屉打开时锁定背景滚动（仅移动端会打开）
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [drawerOpen])
+
   const notify = useCallback((msg: string) => setToast(msg), [])
   useEffect(() => {
     if (!toast) return
@@ -188,14 +196,14 @@ export function Console({ api, onDisconnect }: Props) {
 
   return (
     <div className="flex h-dvh bg-white text-black">
-      {/* 移动端抽屉遮罩 */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-[2px] md:hidden"
-          onClick={() => setDrawerOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {/* 移动端抽屉遮罩：常驻挂载，随抽屉淡入淡出 */}
+      <div
+        className={`fixed inset-0 z-30 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 motion-reduce:transition-none md:hidden ${
+          drawerOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+        onClick={() => setDrawerOpen(false)}
+        aria-hidden="true"
+      />
       <Sidebar
         view={view}
         onViewChange={(v) => {
