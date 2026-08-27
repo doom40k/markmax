@@ -12,6 +12,7 @@ const state = {
   currentTab: null, // 当前标签页 { url, title }，新建书签时预填
   query: '',
   view: 'loading', // loading | config | error | list | form
+  sync: 'ok', // ok | stale（缓存已展示，后台同步中）| offline（同步失败，显示缓存）
   error: '',
   editing: null,
   form: { title: '', url: '', folder: '', tags: '' },
@@ -85,41 +86,68 @@ async function init() {
       render();
       return;
     }
+    // SWR：先用缓存渲染（秒开），再后台刷新
+    const cache = await markmaxApi.loadListCache();
+    if (cache) {
+      applyData(cache.bookmarks, cache.folders || []);
+      state.sync = 'stale';
+      state.view = 'list';
+      render();
+    }
     await refresh();
   } catch {
     /* 不达 */
   }
 }
 
+/** 将服务端/缓存数据写入 state 并重算标签集（不触发渲染）。 */
+function applyData(bookmarks, folderNames) {
+  state.bookmarks = bookmarks;
+  state.folders = folderNames;
+  const m = new Map();
+  for (const b of bookmarks) for (const t of b.tags || []) m.set(t, (m.get(t) || 0) + 1);
+  state.allTags = [...m.keys()].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
+}
+
 async function refresh() {
   try {
-    const res = await markmaxApi.list();
-    state.bookmarks = res.bookmarks || [];
-    try {
-      const f = await markmaxApi.folders();
-      state.folders = (f.folders || []).map((x) => x.name);
-    } catch {
-      state.folders = [];
+    // 两个请求并发，folders 失败不阻塞列表
+    const [listRes, folderRes] = await Promise.allSettled([markmaxApi.list(), markmaxApi.folders()]);
+    if (listRes.status === 'rejected') throw listRes.reason;
+    const bookmarks = listRes.value.bookmarks || [];
+    const folderNames = folderRes.status === 'fulfilled' ? (folderRes.value.folders || []).map((x) => x.name) : [];
+
+    await markmaxApi.saveListCache(bookmarks, folderNames);
+    applyData(bookmarks, folderNames);
+    state.sync = 'ok';
+
+    if (state.view === 'list') {
+      renderList(); // 只重绘列表体，保留搜索框焦点与输入
+    } else if (state.view === 'loading' || state.view === 'error') {
+      state.view = 'list';
+      render();
     }
-    const m = new Map();
-    for (const b of state.bookmarks) for (const t of b.tags || []) m.set(t, (m.get(t) || 0) + 1);
-    state.allTags = [...m.keys()].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
-    state.view = 'list';
-    render();
+    // view 为 form/config 时仅更新数据，返回列表时自然生效
   } catch (e) {
     if (e.message === 'NOT_CONFIGURED') {
       state.view = 'config';
+      render();
     } else if (e.message === 'UNAUTHORIZED') {
       state.view = 'config';
       state.error = 'token 无效，请重新配置';
-    } else if (e.message === 'NETWORK_ERROR') {
-      state.view = 'error';
-      state.error = `无法连接服务端。请确认 markmax-server 已启动，并检查设置中的服务端地址。`;
+      render();
+    } else if (state.view === 'list') {
+      // 网络失败但列表已在屏（缓存或上次成功拉取）：保留列表，footer 提示离线
+      state.sync = 'offline';
+      renderList();
     } else {
       state.view = 'error';
-      state.error = e.message || String(e);
+      state.error =
+        e.message === 'NETWORK_ERROR'
+          ? '无法连接服务端。请确认 markmax-server 已启动，并检查设置中的服务端地址。'
+          : e.message || String(e);
+      render();
     }
-    render();
   }
 }
 
@@ -196,6 +224,11 @@ function configHtml() {
 function bindConfig() {
   const token = $('#cfg-token');
   if (token) token.focus();
+  // 展示跳转到配置页的报错（如 token 无效）
+  if (state.error) {
+    const errEl = $('#cfg-error');
+    if (errEl) errEl.textContent = state.error;
+  }
 }
 
 function listHtml() {
@@ -227,7 +260,7 @@ function listHtml() {
       <div id="list-body" class="list"></div>
       <div class="footer">
         <span id="count-label"></span>
-        <span>同步至服务端</span>
+        <span id="sync-label">同步至服务端</span>
       </div>
     </div>
   `;
@@ -262,6 +295,8 @@ function renderList() {
   if (!list) return;
   const items = visibleBookmarks();
   $('#count-label').textContent = `${items.length} 条书签`;
+  const syncEl = $('#sync-label');
+  if (syncEl) syncEl.textContent = state.sync === 'offline' ? '离线 · 显示缓存' : state.sync === 'stale' ? '同步中…' : '同步至服务端';
   if (items.length === 0) {
     list.innerHTML = `<div class="list-note">${state.query ? '没有匹配的书签' : '还没有书签，点 ＋ 新建一个'}</div>`;
     return;
@@ -611,6 +646,7 @@ async function saveConfig() {
   const server = $('#cfg-server').value.trim();
   const token = $('#cfg-token').value.trim();
   const errEl = $('#cfg-error');
+  state.error = '';
   if (!server || !token) {
     errEl.textContent = '请填写服务端地址和 token';
     return;
@@ -653,6 +689,8 @@ async function deleteBookmark(id) {
   try {
     await markmaxApi.remove(id);
     state.bookmarks = state.bookmarks.filter((x) => x.id !== id);
+    state.sync = 'ok';
+    void markmaxApi.saveListCache(state.bookmarks, state.folders); // 本地更新同步进缓存
     renderList();
     toast('已移入回收站');
   } catch (e) {

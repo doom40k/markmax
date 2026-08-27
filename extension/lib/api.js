@@ -20,11 +20,32 @@ const markmaxApi = (() => {
   async function saveConfig(server, token) {
     config = { server: server.trim().replace(/\/+$/, ''), token: token.trim() };
     await chrome.storage.local.set({ server: config.server, token: config.token });
+    // 配置变更后，旧服务器的列表缓存不再可信
+    await chrome.storage.local.remove('listCache');
   }
 
   async function clearConfig() {
     config = null;
-    await chrome.storage.local.remove(['server', 'token']);
+    await chrome.storage.local.remove(['server', 'token', 'listCache']);
+  }
+
+  /* 书签列表缓存（SWR）：popup 打开时先渲染缓存秒开，后台再刷新服务端数据 */
+  async function loadListCache() {
+    try {
+      const data = await chrome.storage.local.get('listCache');
+      const c = data.listCache;
+      return c && Array.isArray(c.bookmarks) ? c : null; // { bookmarks, folders, ts }
+    } catch {
+      return null; // 存储异常时退化为直接拉取
+    }
+  }
+
+  async function saveListCache(bookmarks, folders) {
+    try {
+      await chrome.storage.local.set({ listCache: { bookmarks, folders, ts: Date.now() } });
+    } catch {
+      /* 配额异常不阻塞主流程，仅失去秒开 */
+    }
   }
 
   async function req(path, init = {}) {
@@ -62,6 +83,8 @@ const markmaxApi = (() => {
     loadConfig,
     saveConfig,
     clearConfig,
+    loadListCache,
+    saveListCache,
     health: () => req('/api/health'),
     list: () => req('/api/bookmarks?deleted=0&limit=5000'),
     create: (b) => req('/api/bookmarks', { method: 'POST', body: JSON.stringify(b) }),
