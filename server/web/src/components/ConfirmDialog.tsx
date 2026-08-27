@@ -28,12 +28,16 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px] sm:p-6"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onCancel()
       }}
     >
-      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl" role="dialog" aria-modal="true">
+      <div
+        className="max-h-[85dvh] w-full max-w-sm overflow-y-auto rounded-lg bg-white p-4 shadow-xl sm:p-6"
+        role="dialog"
+        aria-modal="true"
+      >
         <p className="text-[15px] font-semibold">{title}</p>
         <p className="mt-2 text-sm leading-relaxed text-[#666]">{message}</p>
         <div className="mt-6 flex justify-end gap-2">

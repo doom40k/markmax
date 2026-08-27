@@ -68,12 +68,12 @@ export function ImportModal({ onClose, onImport }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px] sm:p-6"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && phase !== 'importing') onClose()
       }}
     >
-      <div className="w-full max-w-lg rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-2xl">
+      <div className="max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-[#e5e5e5] bg-white p-4 shadow-2xl sm:p-6">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-[#999]">导入书签</h2>
           <button

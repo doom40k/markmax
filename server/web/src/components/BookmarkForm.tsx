@@ -50,14 +50,14 @@ export function BookmarkForm({ bookmark, folders, onClose, onSave }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px] sm:p-6"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
     >
       <form
         onSubmit={submit}
-        className="w-full max-w-lg rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-2xl"
+        className="max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-[#e5e5e5] bg-white p-4 shadow-2xl sm:p-6"
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-[#999]">
@@ -96,7 +96,7 @@ export function BookmarkForm({ bookmark, folders, onClose, onSave }: Props) {
               className={inputCls}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={labelCls}>文件夹</label>
               <FolderSelect folders={folders} value={folder} onChange={setFolder} />

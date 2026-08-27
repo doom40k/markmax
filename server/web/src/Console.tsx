@@ -30,6 +30,7 @@ export function Console({ api, onDisconnect }: Props) {
   const [editing, setEditing] = useState<Bookmark | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Bookmark | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
   const refresh = useCallback(async () => {
@@ -186,18 +187,33 @@ export function Console({ api, onDisconnect }: Props) {
   }
 
   return (
-    <div className="flex h-screen bg-white text-black">
+    <div className="flex h-dvh bg-white text-black">
+      {/* 移动端抽屉遮罩 */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-[2px] md:hidden"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <Sidebar
         view={view}
         onViewChange={(v) => {
           setView(v)
           setFolder(null)
           setTag(null)
+          setDrawerOpen(false)
         }}
         folder={folder}
         tag={tag}
-        onFolderChange={setFolder}
-        onTagChange={setTag}
+        onFolderChange={(f) => {
+          setFolder(f)
+          setDrawerOpen(false)
+        }}
+        onTagChange={(t) => {
+          setTag(t)
+          setDrawerOpen(false)
+        }}
         folderInfos={folderInfos}
         tags={tags}
         allCount={all.length}
@@ -208,6 +224,7 @@ export function Console({ api, onDisconnect }: Props) {
         onCreateFolder={handleCreateFolder}
         onRenameFolder={handleRenameFolder}
         onDeleteFolder={handleDeleteFolder}
+        mobileOpen={drawerOpen}
       />
 
       <main className="flex min-w-0 flex-1 flex-col">
@@ -217,8 +234,9 @@ export function Console({ api, onDisconnect }: Props) {
           searchRef={searchRef}
           onNew={() => openForm()}
           onImport={() => setImportOpen(true)}
+          onMenu={() => setDrawerOpen(true)}
         />
-        <div className="flex-1 overflow-y-auto px-8 pb-16">
+        <div className="flex-1 overflow-y-auto px-4 pb-16 md:px-8">
           <div className="mx-auto max-w-3xl">
             {!loaded ? (
               <p className="py-24 text-center font-mono text-xs uppercase tracking-[0.3em] text-[#999]">

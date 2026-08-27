@@ -131,6 +131,8 @@ interface Props {
   onCreateFolder: (name: string) => Promise<void>
   onRenameFolder: (oldName: string, newName: string) => Promise<void>
   onDeleteFolder: (name: string) => Promise<void>
+  /** 移动端抽屉开关：桌面端（md:）始终常驻，忽略此值 */
+  mobileOpen: boolean
 }
 
 export function Sidebar({
@@ -150,6 +152,7 @@ export function Sidebar({
   onCreateFolder,
   onRenameFolder,
   onDeleteFolder,
+  mobileOpen,
 }: Props) {
   const tree = useMemo(() => buildTree(folderInfos), [folderInfos])
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
@@ -202,7 +205,7 @@ export function Sidebar({
               {n.label}
             </button>
             <span className="shrink-0 font-mono text-xs opacity-60">{n.count}</span>
-            <div className="flex shrink-0 gap-1 font-mono text-[13px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+            <div className="flex shrink-0 gap-1 font-mono text-[13px] opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
               <button
                 title="新建子文件夹"
                 onClick={() => {
@@ -260,7 +263,9 @@ export function Sidebar({
     })
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-[#e5e5e5] bg-[#fafafa]">
+    <aside
+      className={`${mobileOpen ? 'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] shadow-2xl' : 'hidden'} md:static md:z-auto md:flex md:w-60 md:max-w-none md:shadow-none shrink-0 flex-col border-r border-[#e5e5e5] bg-[#fafafa]`}
+    >
       <div className="flex items-center gap-2 px-4 pb-4 pt-5">
         <div className="flex h-7 w-7 items-center justify-center bg-black font-mono text-sm font-semibold text-white">
           m
